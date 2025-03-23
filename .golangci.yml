@@ -1,18 +1,13 @@
 # Options for analysis running.
 run:
-  # Include test files or not.
   tests: true
 
-# output configuration options
 output:
-  # colored-line-number|line-number|json|tab|checkstyle, default is "colored-line-number"
-  formats: colored-line-number
-
-  # Print lines of code with issue, default: true
-  print-issued-lines: true
-
-  # Print linter name in the end of issue text, default: true
-  print-linter-name: true
+  show-stats: true
+  sort-results: true
+  sort-order:
+    - linter
+    - file
 
 
 # All available settings of specific linters.
@@ -28,7 +23,6 @@ linters-settings:
   govet:
     disable:
       - fieldalignment
-    shadow: true
   gofmt:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true

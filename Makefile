@@ -9,13 +9,9 @@ BUILD_DATE                 ?= $(shell date +%FT%T%z)
 BASE_IMAGE                 := gravitum
 IMAGE_SERVICE              := $(BASE_IMAGE)/service/user:$(SERVICE_VERSION)
 
-OAPI_CODEGEN_VERSION       := 2.4.1
-GOLANGCI_LINT_VERSION      := 1.64.6
-
 MAIN_PACKAGE_PATH          := ./cmd/
 BINARY_NAME                := user_service
-TEMP_DIR                   := /var/tmp/gravitum/user
-TEMP_BIN                   := ${TEMP_DIR}/bin
+TEMP_BIN                   := /var/tmp/gravitum/user/bin
 PROJECT_PKG                := github.com/Karzoug/gravitum-user-service
 
 LDFLAGS += -s -w
@@ -73,7 +69,7 @@ test/cover:
 ## lint: run linters
 .PHONY: lint
 lint:
-	$(TEMP_BIN)/golangci-lint run ./...
+	golangci-lint run ./...
 
 # ==================================================================================== #
 # DEVELOPMENT
@@ -93,8 +89,7 @@ build:
 ## generate: generate all necessary code
 .PHONY: generate
 generate:
-	$(TEMP_BIN)/oapi-codegen --config=oapi_server.config.yaml api/openapi/user/v1/api.yaml
-	$(TEMP_BIN)/oapi-codegen --config=oapi_models.config.yaml api/openapi/user/v1/api.yaml
+	go generate ./...
 
 ## clean: clean all temporary files
 .PHONY: clean
@@ -106,8 +101,7 @@ clean:
 
 ## dev-install-deps: install dependencies with fixed versions in a temporary directory
 dev-install-deps:
-	GOBIN=$(TEMP_BIN) go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v${OAPI_CODEGEN_VERSION}
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(TEMP_BIN) v${GOLANGCI_LINT_VERSION}
+	go install tool
 
 # ==============================================================================
 # Building containers
