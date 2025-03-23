@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: user
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U user -d user']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  migrate:
+    image: migrate/migrate
+    volumes:
+      - ./../../migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgresql://user:password@postgres:5432/user?sslmode=disable", "up"]
+    links: 
+      - postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/dev-prom.yaml'
+    ports:
+       - 9090:9090
+    restart: unless-stopped
+    volumes:
+      - ./../metric/dev:/etc/prometheus
+
+  user-service:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: ${IMAGE_SERVICE}
+    container_name: user-service
+    environment:
+      LOG_LEVEL: debug
+      PG_URI: postgresql://user:password@postgres:5432/user?sslmode=disable
+    ports:
+       - 3000:3000
+    restart: unless-stopped

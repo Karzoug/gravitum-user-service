@@ -1,0 +1,177 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0
+  title: Gravitum REST API
+  description: API for common CRUD operations.
+
+servers:
+  - url: http://localhost:3000/{basePath}
+    description: The dev API server.
+    variables:
+      basePath:
+        default: api/web/v1
+
+paths:
+  /users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Unique identifier of the user.
+        schema:
+          type: string
+    get:
+      tags:
+        - user
+      summary: Returns a variety of information about a single user specified by the requested ID.
+      security: []
+      responses:
+        '200':
+          description: User info.
+          content: 
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+        - user
+      summary: Update information about the user.    
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MutableUser'
+      responses:
+        '200':
+          description: User updated.
+          content: 
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+        - user
+      summary: Delete the user.
+      responses:
+        '204':
+          description: User deleted.
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/:
+    post:
+      tags:
+        - user
+      summary: Creates a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MutableUser'
+      responses:
+        '201':
+          description: User created.
+          content: 
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The id of the user.
+          example: 9m4e2mr0ui3e8a215n4g
+        username:
+          type: string
+          description: The username (handle) of the user.
+          minLength: 3
+          maxLength: 50
+          example: NArmstrong
+        name:
+          type: string
+          description: The name of the user.
+          minLength: 1
+          maxLength: 50
+          example: Neil Armstrong
+        imageUrl:
+          type: string
+          format: uri
+          description: The image url of the user.
+        statusText:
+          type: string
+          description: The status text of the user.
+          maxLength: 200
+          example: That's one small step for man. One giant leap for mankind.
+      required:
+        - id
+        - username
+        - name
+        - imageUrl
+        - statusText
+
+    MutableUser:
+      type: object
+      properties:
+        username:
+          type: string
+          description: The username (handle) of the user.
+          minLength: 3
+          maxLength: 50
+          example: NArmstrong
+        name:
+          type: string
+          description: The name of the user.
+          minLength: 1
+          maxLength: 50
+          example: Neil Armstrong
+        imageUrl:
+          type: string
+          format: uri
+          description: The image url of the user.
+        statusText:
+          type: string
+          description: The status text of the user.
+          maxLength: 200
+          example: That's one small step for man. One giant leap for mankind.
+      required:
+        - username
+        - name
+        - imageUrl
+        - statusText
+   
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Description of the error.
+      required:
+        - error
